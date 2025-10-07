@@ -3,13 +3,26 @@
     <style name="Base.Theme.EVChargingStationApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-         <item name="android:statusBarColor">@color/darkBlue</item>
+         <item name="android:statusBarColor">@color/primaryGrey</item>
 
     </style>
-
-    <style name="Theme.EVChargingStationApp" parent="Base.Theme.EVChargingStationApp" />
-
     <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">@color/white</item>
+        <item name="android:color">@color/darkGrey</item>
     </style>
+
+    <style name="Theme.EVChargingStationApp" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/primaryGreen</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/primaryGrey</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="android:statusBarColor">?attr/colorSurface</item>
+    </style>
+
+    <style name="Theme.EVChargingStationApp.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@drawable/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/app_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.EVChargingStationApp</item>
+    </style>
+
 </resources>
+

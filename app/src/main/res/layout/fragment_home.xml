@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:text="Home"
         android:textSize="36sp"
-        android:textColor="@color/darkBlue"
+        android:textColor="@color/primaryGrey"
         android:gravity="center"/>
 
 </FrameLayout>
