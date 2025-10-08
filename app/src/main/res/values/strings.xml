@@ -1,5 +1,12 @@
 <resources>
-    <string name="app_name">EV Charging Station App</string>
+    <string name="app_name">Volt Spot</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="booking_details">Booking Details</string>
+    <string name="booking_title">Booking Title</string>
+    <string name="good_morning">Good Morning</string>
+    <string name="upcoming_reservations">Upcoming Reservations</string>
+    <string name="see_all">See All</string>
+    <string name="pending_0">Pending: 0</string>
+    <string name="approved_0">Approved: 0</string>
 </resources>

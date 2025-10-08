@@ -47,4 +47,23 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.facebook.shimmer:shimmer:0.5.0")
 
+    // For tabs & lists
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+    implementation("com.google.android.material:material:1.11.0")
+
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+
+    // QR Code generation
+    implementation("com.google.zxing:core:3.5.3")
+
+    // Google Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Material Components for cards & styling
+    implementation("com.google.android.material:material:1.11.0")
+
+    // For icons
+    implementation("androidx.appcompat:appcompat:1.7.0")
 }
