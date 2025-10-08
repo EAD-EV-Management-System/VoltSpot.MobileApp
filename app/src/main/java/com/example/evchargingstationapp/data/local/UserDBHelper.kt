@@ -7,14 +7,16 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.example.evchargingstationapp.model.User
 
 class UserDbHelper(context: Context) :
-    SQLiteOpenHelper(context, "ev_users.db", null, 1) {
+    SQLiteOpenHelper(context, "ev_users.db", null, 2) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """CREATE TABLE users (
                 nic TEXT PRIMARY KEY,
-                name TEXT,
+                firstName TEXT,
+                lastName TEXT,
                 email TEXT,
+                phoneNumber TEXT,
                 password TEXT,
                 status INTEGER
             )"""
@@ -30,8 +32,10 @@ class UserDbHelper(context: Context) :
         val db = writableDatabase
         val values = ContentValues().apply {
             put("nic", user.nic)
-            put("name", user.name)
+            put("firstName", user.firstName)
+            put("lastName", user.lastName)
             put("email", user.email)
+            put("phoneNumber", user.phoneNumber)
             put("password", user.password)
             put("status", user.isActive)
         }
@@ -44,7 +48,7 @@ class UserDbHelper(context: Context) :
         val db = readableDatabase
         val cursor = db.query(
             "users",
-            arrayOf("nic", "name", "email", "password", "status"),
+            arrayOf("nic", "firstName", "lastName", "email", "phoneNumber", "password", "status"),
             "nic=? AND status=1",
             arrayOf(nic),
             null, null, null
@@ -53,10 +57,12 @@ class UserDbHelper(context: Context) :
         if (cursor.moveToFirst()) {
             user = User(
                 nic = cursor.getString(0),
-                name = cursor.getString(1),
-                email = cursor.getString(2),
-                password = cursor.getString(3),
-                isActive = cursor.getInt(4)
+                firstName = cursor.getString(1),
+                lastName = cursor.getString(2),
+                email = cursor.getString(3),
+                phoneNumber = cursor.getString(4),
+                password = cursor.getString(5),
+                isActive = cursor.getInt(6)
             )
         }
         cursor.close()
@@ -67,8 +73,10 @@ class UserDbHelper(context: Context) :
     fun updateUser(user: User): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
-            put("name", user.name)
+            put("firstName", user.firstName)
+            put("lastName", user.lastName)
             put("email", user.email)
+            put("phoneNumber", user.phoneNumber)
             put("password", user.password)
         }
         val rows = db.update("users", values, "nic=?", arrayOf(user.nic))
@@ -96,8 +104,10 @@ class UserDbHelper(context: Context) :
         val db = writableDatabase
         val values = ContentValues().apply {
             put("nic", user.nic)
-            put("name", user.name)
+            put("firstName", user.firstName)
+            put("lastName", user.lastName)
             put("email", user.email)
+            put("phoneNumber", user.phoneNumber)
             put("password", user.password ?: "") // handle null
             put("status", user.isActive)
         }

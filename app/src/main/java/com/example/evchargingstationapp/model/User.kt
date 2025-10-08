@@ -2,8 +2,10 @@ package com.example.evchargingstationapp.model
 
 data class User(
     val nic: String,
-    var name: String,
+    var firstName: String,
+    var lastName: String,
     var email: String,
-    val password: String? = null,   // 👈 optional now
+    var phoneNumber: String,
+    val password: String? = null,
     var isActive: Int = 1 // 1 = active, 0 = deactivated
 )
