@@ -1,4 +1,4 @@
-package com.example.evchargingstationapp.ui.bookings
+package com.example.evchargingstationapp.ui.operator
 
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -20,35 +20,37 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.content.ContextCompat
 
-class BookingDetailActivity : AppCompatActivity() {
+class OperatorBookingDetailActivity : AppCompatActivity() {
 
     private lateinit var bookingRepository: BookingRepository
+    private lateinit var tvBookingId: TextView
+    private lateinit var tvCustomerName: TextView
+    private lateinit var tvCustomerNic: TextView
     private lateinit var tvStationName: TextView
     private lateinit var tvSlotNumber: TextView
-    private lateinit var tvReservationDate: TextView
+    private lateinit var tvDateTime: TextView
     private lateinit var tvStatus: TextView
-    private lateinit var tvBookingId: TextView
-    private lateinit var qrImage: ImageView
-    private lateinit var btnComplete: Button
-    private lateinit var loadingLayout: View
+    private lateinit var ivQRCode: ImageView
+    private lateinit var btnConfirm: Button
 
     private var currentBooking: Booking? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_booking_detail)
+        setContentView(R.layout.activity_operator_booking_detail)
 
         bookingRepository = BookingRepository(this)
 
         // Initialize views
+        tvBookingId = findViewById(R.id.tvBookingId)
+        tvCustomerName = findViewById(R.id.tvCustomerName)
+        tvCustomerNic = findViewById(R.id.tvCustomerNic)
         tvStationName = findViewById(R.id.tvStationName)
         tvSlotNumber = findViewById(R.id.tvSlotNumber)
-        tvReservationDate = findViewById(R.id.tvReservationDate)
+        tvDateTime = findViewById(R.id.tvDateTime)
         tvStatus = findViewById(R.id.tvStatus)
-        tvBookingId = findViewById(R.id.tvBookingId)
-        qrImage = findViewById(R.id.qrImage)
-        btnComplete = findViewById(R.id.btnComplete)
-        loadingLayout = findViewById(R.id.loadingLayout)
+        ivQRCode = findViewById(R.id.ivQRCode)
+        btnConfirm = findViewById(R.id.btnConfirm)
 
         val bookingId = intent.getStringExtra("BOOKING_ID")
         if (bookingId.isNullOrEmpty()) {
@@ -59,37 +61,35 @@ class BookingDetailActivity : AppCompatActivity() {
 
         loadBookingDetails(bookingId)
 
-        btnComplete.setOnClickListener {
+        btnConfirm.setOnClickListener {
             currentBooking?.let { booking ->
-                completeBooking(booking.id)
+                confirmBooking(booking.id)
             }
         }
     }
 
     private fun loadBookingDetails(bookingId: String) {
-        loadingLayout.visibility = View.VISIBLE
-
         bookingRepository.getBookingById(bookingId) { success, message, booking ->
-            loadingLayout.visibility = View.GONE
-
             if (success && booking != null) {
                 currentBooking = booking
                 displayBookingDetails(booking)
             } else {
-                Toast.makeText(this, "Failed to load booking: $message", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Failed to load: $message", Toast.LENGTH_LONG).show()
                 finish()
             }
         }
     }
 
     private fun displayBookingDetails(booking: Booking) {
-        tvBookingId.text = "Booking ID: ${booking.id}"
-        tvStationName.text = booking.chargingStationName ?: "Station ${booking.chargingStationId}"
-        tvSlotNumber.text = "Slot Number: ${booking.slotNumber}"
-        tvReservationDate.text = "Date: ${formatDateTime(booking.reservationDateTime)}"
+        tvBookingId.text = "Booking ID: #${booking.id.takeLast(8)}"
+        tvCustomerName.text = "Name: Customer (${booking.evOwnerNic})"
+        tvCustomerNic.text = "NIC: ${booking.evOwnerNic}"
+        tvStationName.text = "Station: ${booking.chargingStationName ?: "Unknown"}"
+        tvSlotNumber.text = "Slot: ${booking.slotNumber}"
+        tvDateTime.text = "Date: ${formatDateTime(booking.reservationDateTime)}"
         tvStatus.text = "Status: ${booking.status.name}"
 
-        // Set status color
+        // Status color
         val statusColor = when (booking.status) {
             BookingStatus.Pending -> ContextCompat.getColor(this, R.color.statusPending)
             BookingStatus.Confirmed -> ContextCompat.getColor(this, R.color.statusConfirmed)
@@ -98,30 +98,30 @@ class BookingDetailActivity : AppCompatActivity() {
         }
         tvStatus.setTextColor(statusColor)
 
-        // Show complete button only for confirmed bookings
-        if (booking.status == BookingStatus.Confirmed) {
-            btnComplete.visibility = View.VISIBLE
+        // Show confirm button only for pending bookings
+        if (booking.status == BookingStatus.Pending) {
+            btnConfirm.visibility = View.VISIBLE
         } else {
-            btnComplete.visibility = View.GONE
+            btnConfirm.visibility = View.GONE
         }
 
         // Generate QR code
-        generateQRCode(booking.id, qrImage)
+        generateQRCode(booking.id, ivQRCode)
     }
 
-    private fun completeBooking(bookingId: String) {
-        btnComplete.isEnabled = false
-        Toast.makeText(this, "Completing booking...", Toast.LENGTH_SHORT).show()
+    private fun confirmBooking(bookingId: String) {
+        btnConfirm.isEnabled = false
+        Toast.makeText(this, "Confirming booking...", Toast.LENGTH_SHORT).show()
 
-        bookingRepository.completeBooking(bookingId) { success, message ->
-            btnComplete.isEnabled = true
+        bookingRepository.confirmBooking(bookingId) { success, message ->
+            btnConfirm.isEnabled = true
 
             if (success) {
-                Toast.makeText(this, "Booking completed successfully!", Toast.LENGTH_SHORT).show()
-                // Reload the booking details to update status
+                Toast.makeText(this, "Booking confirmed!", Toast.LENGTH_SHORT).show()
+                // Reload to update status
                 loadBookingDetails(bookingId)
             } else {
-                Toast.makeText(this, "Failed to complete: $message", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Failed: $message", Toast.LENGTH_LONG).show()
             }
         }
     }

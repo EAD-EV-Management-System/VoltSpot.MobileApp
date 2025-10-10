@@ -2,11 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
-        tools:ignore="ManifestOrder" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -20,9 +22,9 @@
         <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCAMxkmvnJLJ2wiFXpBeUvCojXlXjPNL98"/>
+            android:value="AIzaSyCAMxkmvnJLJ2wiFXpBeUvCojXlXjPNL98" />
 
-        <!-- Splash Screen is the true launcher -->
+        <!-- Splash Screen (Launcher Activity) -->
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
@@ -33,18 +35,42 @@
             </intent-filter>
         </activity>
 
+        <!-- Authentication -->
+        <activity android:name=".ui.auth.LoginActivity" android:exported="true" />
+        <activity android:name=".ui.auth.RegisterActivity" android:exported="true" />
+
+        <!-- Dashboard (Main Activity after login) -->
+        <activity android:name=".ui.dashboard.MainActivity" android:exported="true" />
+
+        <!-- Booking-related Activities -->
         <activity
-            android:name=".ui.auth.LoginActivity"
-            android:exported="true" />
+            android:name=".ui.bookings.AddBookingActivity"
+            android:exported="false"
+            android:label="Create Booking" />
+        <activity
+            android:name=".ui.bookings.BookingDetailActivity"
+            android:exported="false"
+            android:label="Booking Details" />
+
+        <!-- Station Operator Activities -->
+        <activity
+            android:name=".ui.operator.OperatorLoginActivity"
+            android:exported="false" />
 
         <activity
-            android:name=".ui.auth.RegisterActivity"
-            android:exported="true" />
+            android:name=".ui.operator.OperatorMainActivity"
+            android:exported="false" />
 
         <activity
-            android:name=".ui.dashboard.MainActivity"
-            android:exported="true" />
+            android:name=".ui.operator.OperatorBookingDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.operator.QRScannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
     </application>
+
 
 </manifest>

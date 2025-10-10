@@ -1,19 +1,31 @@
 package com.example.evchargingstationapp.ui.bookings
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.evchargingstationapp.R
+import com.example.evchargingstationapp.data.local.PrefsHelper
+import com.example.evchargingstationapp.data.repository.BookingRepository
+import com.example.evchargingstationapp.model.Booking
+import com.example.evchargingstationapp.model.BookingStatus
+import com.example.evchargingstationapp.model.CancelBookingRequest
+import com.example.evchargingstationapp.model.UpdateBookingRequest
 import com.facebook.shimmer.ShimmerFrameLayout
 
 class UpcomingBookingsFragment : Fragment() {
 
     private lateinit var shimmerLayout: ShimmerFrameLayout
     private lateinit var recyclerView: RecyclerView
+    private lateinit var bookingRepository: BookingRepository
+    private lateinit var prefs: PrefsHelper
+    private lateinit var adapter: BookingAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,21 +37,123 @@ class UpcomingBookingsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        // Start shimmer (loading)
-        shimmerLayout.startShimmer()
+        bookingRepository = BookingRepository(requireContext())
+        prefs = PrefsHelper(requireContext())
 
-        // Simulate delay for loading data
-        recyclerView.postDelayed({
+        // Initialize adapter with callbacks
+        adapter = BookingAdapter(
+            emptyList(),
+            requireContext(),
+            onCancelClick = { booking -> showCancelDialog(booking) },
+            onUpdateClick = { booking -> showUpdateDialog(booking) }
+        )
+        recyclerView.adapter = adapter
+
+        loadBookings()
+
+        return view
+    }
+
+    private fun loadBookings() {
+        shimmerLayout.startShimmer()
+        shimmerLayout.visibility = View.VISIBLE
+        recyclerView.visibility = View.GONE
+
+        val userNic = prefs.getNic()
+        if (userNic.isNullOrEmpty()) {
+            Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show()
+            shimmerLayout.stopShimmer()
+            shimmerLayout.visibility = View.GONE
+            return
+        }
+
+        bookingRepository.getBookingsByEvOwner(userNic) { success, message, bookings ->
             shimmerLayout.stopShimmer()
             shimmerLayout.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
 
-            recyclerView.adapter = BookingAdapter(
-                listOf("Booking #001", "Booking #002", "Booking #003"),
-                requireContext()
-            )
-        }, 2000)
+            if (success && bookings != null) {
+                // Filter for upcoming bookings (Pending and Confirmed)
+                val upcomingBookings = bookings.filter {
+                    it.status == BookingStatus.Pending || it.status == BookingStatus.Confirmed
+                }
+                adapter.updateBookings(upcomingBookings)
 
-        return view
+                if (upcomingBookings.isEmpty()) {
+                    Toast.makeText(context, "No upcoming bookings", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(context, "Failed to load bookings: $message", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun showCancelDialog(booking: Booking) {
+        val input = EditText(context)
+        input.hint = "Cancellation reason"
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Cancel Booking")
+            .setMessage("Are you sure you want to cancel this booking?")
+            .setView(input)
+            .setPositiveButton("Cancel Booking") { _, _ ->
+                val reason = input.text.toString().trim()
+                if (reason.isEmpty()) {
+                    Toast.makeText(context, "Please provide a reason", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                cancelBooking(booking.id, reason)
+            }
+            .setNegativeButton("Back", null)
+            .show()
+    }
+
+    private fun cancelBooking(bookingId: String, reason: String) {
+        val request = CancelBookingRequest(bookingId, reason)
+        bookingRepository.cancelBooking(request) { success, message ->
+            if (success) {
+                Toast.makeText(context, "Booking cancelled successfully", Toast.LENGTH_SHORT).show()
+                loadBookings() // Reload the list
+            } else {
+                Toast.makeText(context, "Failed to cancel: $message", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun showUpdateDialog(booking: Booking) {
+        val input = EditText(context)
+        input.hint = "New date/time (yyyy-MM-ddTHH:mm:ss)"
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Update Booking")
+            .setMessage("Enter new reservation date and time")
+            .setView(input)
+            .setPositiveButton("Update") { _, _ ->
+                val newDateTime = input.text.toString().trim()
+                if (newDateTime.isEmpty()) {
+                    Toast.makeText(context, "Please provide a date/time", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                updateBooking(booking.id, newDateTime)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun updateBooking(bookingId: String, newDateTime: String) {
+        val request = UpdateBookingRequest(bookingId, newDateTime)
+        bookingRepository.updateBooking(request) { success, message ->
+            if (success) {
+                Toast.makeText(context, "Booking updated successfully", Toast.LENGTH_SHORT).show()
+                loadBookings() // Reload the list
+            } else {
+                Toast.makeText(context, "Failed to update: $message", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadBookings() // Refresh when fragment becomes visible
     }
 }

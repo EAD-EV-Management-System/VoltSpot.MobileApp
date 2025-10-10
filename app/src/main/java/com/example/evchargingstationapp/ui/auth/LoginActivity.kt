@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.evchargingstationapp.R
 import com.example.evchargingstationapp.data.repository.UserRepository
 import com.example.evchargingstationapp.ui.dashboard.MainActivity
+import com.example.evchargingstationapp.ui.operator.OperatorLoginActivity
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var userRepository: UserRepository
@@ -23,28 +24,34 @@ class LoginActivity : AppCompatActivity() {
         val etNic = findViewById<EditText>(R.id.etNic)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val loginBtn = findViewById<Button>(R.id.btnLogin)
-
         val registerLink = findViewById<TextView>(R.id.tvRegisterLink)
+        val operatorLink = findViewById<TextView>(R.id.operatorLink) // ✅ add this line
+
+        // Register link
         registerLink.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(Intent(this, RegisterActivity::class.java))
+        }
+
+        // Operator login link
+        operatorLink.setOnClickListener {
+            val intent = Intent(this, OperatorLoginActivity::class.java)
             startActivity(intent)
         }
 
+        // Regular user login
         loginBtn.setOnClickListener {
             val nic = etNic.text.toString().trim()
             val password = etPassword.text.toString()
 
-            // Validation
             if (nic.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Disable button to prevent multiple clicks
             loginBtn.isEnabled = false
             Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show()
 
-            userRepository.login(nic, password) { success, message ->
+            userRepository.login(nic, password) { success: Boolean, message: String ->
                 loginBtn.isEnabled = true
                 if (success) {
                     Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()

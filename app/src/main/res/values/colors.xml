@@ -6,4 +6,11 @@
     <color name="primaryGrey">#262c29</color>
     <color name="primaryGreen">#2fc284</color>
     <color name="darkBlue">#190061</color>
+
+    <!-- Status colors for bookings -->
+    <color name="statusPending">#FFA500</color> <!-- Orange -->
+    <color name="statusConfirmed">#00FF00</color> <!-- Green -->
+    <color name="statusCompleted">#0080FF</color> <!-- Blue -->
+    <color name="statusCancelled">#FF0000</color> <!-- Red -->
+    <color name="errorRed">#FF0000</color>
 </resources>

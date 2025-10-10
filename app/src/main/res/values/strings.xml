@@ -9,4 +9,8 @@
     <string name="see_all">See All</string>
     <string name="pending_0">Pending: 0</string>
     <string name="approved_0">Approved: 0</string>
+    <string name="add_new_booking">Add new booking</string>
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
 </resources>
