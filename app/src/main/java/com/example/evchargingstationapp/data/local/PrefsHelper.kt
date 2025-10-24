@@ -10,6 +10,7 @@ class PrefsHelper(context: Context) {
         private const val KEY_ACCESS_TOKEN = "access_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
         private const val KEY_NIC = "nic"
+        private const val KEY_OPERATOR_ID = "operator_id"  // ✅ Move it here
     }
 
     fun saveAccessToken(token: String) {
@@ -18,6 +19,14 @@ class PrefsHelper(context: Context) {
 
     fun getAccessToken(): String? {
         return prefs.getString(KEY_ACCESS_TOKEN, null)
+    }
+
+    fun saveOperatorId(operatorId: String) {
+        prefs.edit().putString(KEY_OPERATOR_ID, operatorId).apply()
+    }
+
+    fun getOperatorId(): String? {
+        return prefs.getString(KEY_OPERATOR_ID, null)
     }
 
     fun saveRefreshToken(token: String) {

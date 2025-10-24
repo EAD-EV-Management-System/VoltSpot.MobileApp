@@ -32,7 +32,7 @@ class OperatorProfileFragment : Fragment() {
         btnLogout = view.findViewById(R.id.btnLogout)
 
         // Display user info
-        val userId = prefs.getUserId() ?: "Unknown"
+        val userId = prefs.getUserId() ?: "operator23"
         val role = prefs.getUserRole() ?: "Station Operator"
 
         tvUsername.text = "User ID: $userId"

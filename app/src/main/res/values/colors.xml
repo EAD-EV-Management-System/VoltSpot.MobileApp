@@ -7,6 +7,7 @@
     <color name="primaryGrey">#262c29</color>
     <color name="primaryGreen">#2fc284</color>
     <color name="darkBlue">#190061</color>
+    <color name="zxing_custom_viewfinder_mask">#60000000</color>
 
     <!-- Status colors for bookings -->
     <color name="statusPending">#FFA500</color> <!-- Orange -->

@@ -1,12 +1,11 @@
 package com.example.evchargingstationapp.ui.operator
 
 import android.content.Context
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.evchargingstationapp.R
 import com.example.evchargingstationapp.model.Booking
@@ -17,15 +16,16 @@ import java.util.*
 class OperatorBookingAdapter(
     private var bookings: List<Booking>,
     private val context: Context,
-    private val onItemClick: (Booking) -> Unit
+    private val onBookingClick: ((Booking) -> Unit)? = null
 ) : RecyclerView.Adapter<OperatorBookingAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvCustomerName: TextView = view.findViewById(R.id.tvCustomerName)
-        val tvCustomerNic: TextView = view.findViewById(R.id.tvCustomerNic)
-        val tvStationInfo: TextView = view.findViewById(R.id.tvStationInfo)
-        val tvDateTime: TextView = view.findViewById(R.id.tvDateTime)
-        val tvStatus: TextView = view.findViewById(R.id.tvBookingStatus)
+        val bookingId: TextView = view.findViewById(R.id.tvBookingId)
+        val evOwnerNic: TextView = view.findViewById(R.id.tvEvOwnerNic)
+        val stationName: TextView = view.findViewById(R.id.tvStationName)
+        val slotNumber: TextView = view.findViewById(R.id.tvSlotNumber)
+        val reservationTime: TextView = view.findViewById(R.id.tvReservationTime)
+        val status: TextView = view.findViewById(R.id.tvStatus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -34,39 +34,51 @@ class OperatorBookingAdapter(
         return ViewHolder(view)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val booking = bookings[position]
 
-        // This would typically come from a user lookup
-        holder.tvCustomerName.text = "👤 Customer (${booking.evOwnerNic})"
-        holder.tvCustomerNic.text = "NIC: ${booking.evOwnerNic}"
-        holder.tvStationInfo.text = "📍 ${booking.chargingStationName ?: "Station"} - Slot ${booking.slotNumber}"
-        holder.tvDateTime.text = "🕐 ${formatDateTime(booking.reservationDateTime)}"
-        holder.tvStatus.text = booking.status.name
+        // Booking ID
+        holder.bookingId.text = "Booking ID: ${booking.id}"
 
-        // Status color
+        // EV Owner NIC
+        holder.evOwnerNic.text = "Customer: ${booking.evOwnerNic}"
+
+        // Station name (fallback to ID if name is missing)
+        holder.stationName.text = "Station: ${booking.chargingStationName ?: booking.chargingStationId}"
+
+        // Slot number
+        holder.slotNumber.text = "Slot: ${booking.slotNumber}"
+
+        // Reservation time
+        val formattedTime = formatDateTime(booking.reservationDateTime)
+        holder.reservationTime.text = "Time: $formattedTime"
+
+        // Status
+        holder.status.text = booking.status.name
+
         val statusColor = when (booking.status) {
-            BookingStatus.Pending -> context.getColor(R.color.statusPending)
-            BookingStatus.Confirmed -> context.getColor(R.color.statusConfirmed)
-            BookingStatus.Completed -> context.getColor(R.color.statusCompleted)
-            BookingStatus.Cancelled -> context.getColor(R.color.statusCancelled)
+            BookingStatus.Pending -> ContextCompat.getColor(context, R.color.statusPending)
+            BookingStatus.Confirmed -> ContextCompat.getColor(context, R.color.statusConfirmed)
+            BookingStatus.Completed -> ContextCompat.getColor(context, R.color.statusCompleted)
+            BookingStatus.Cancelled -> ContextCompat.getColor(context, R.color.statusCancelled)
         }
-        holder.tvStatus.setTextColor(statusColor)
+        holder.status.setTextColor(statusColor)
 
+        // Handle card click
         holder.itemView.setOnClickListener {
-            onItemClick(booking)
+            onBookingClick?.invoke(booking)
         }
     }
 
-    override fun getItemCount() = bookings.size
+    override fun getItemCount(): Int = bookings.size
 
     fun updateBookings(newBookings: List<Booking>) {
         bookings = newBookings
         notifyDataSetChanged()
     }
 
-    private fun formatDateTime(isoDateTime: String): String {
+    private fun formatDateTime(isoDateTime: String?): String {
+        if (isoDateTime.isNullOrEmpty()) return "Unknown date"
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
             val outputFormat = SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault())
