@@ -1,6 +1,7 @@
 package com.example.evchargingstationapp.data.remote
 
 import android.content.Context
+import android.util.Log
 import com.example.evchargingstationapp.data.local.PrefsHelper
 import org.json.JSONObject
 import java.io.BufferedWriter
@@ -12,6 +13,7 @@ class ApiClient(private val context: Context) {
     private val prefs = PrefsHelper(context)
 
     companion object {
+        private const val TAG = "ApiClient"
         private const val BASE_URL = "http://10.0.2.2:2030"
     }
 
@@ -86,32 +88,46 @@ class ApiClient(private val context: Context) {
             conn.connectTimeout = 10000
             conn.readTimeout = 10000
 
+            Log.d(TAG, "=== API REQUEST ===")
+            Log.d(TAG, "URL: $BASE_URL$endpoint")
+            Log.d(TAG, "Method: $method")
+            Log.d(TAG, "Body: ${body?.toString() ?: "null"}")
+
             // Add authorization header if required
             if (requiresAuth) {
                 val accessToken = prefs.getAccessToken()
+                Log.d(TAG, "Auth Token: ${if (!accessToken.isNullOrEmpty()) "Present (${accessToken.take(20)}...)" else "Missing"}")
                 if (!accessToken.isNullOrEmpty()) {
                     conn.setRequestProperty("Authorization", "Bearer $accessToken")
                 }
             }
 
-            // Add body if present (for POST/PUT)
-            if (body != null && (method == "POST" || method == "PUT")) {
+            // Add body if present (for POST/PUT/PATCH)
+            if (body != null && (method == "POST" || method == "PUT" || method == "PATCH")) {
                 conn.doOutput = true
                 val out = BufferedWriter(OutputStreamWriter(conn.outputStream, "UTF-8"))
                 out.write(body.toString())
                 out.flush()
                 out.close()
+            } else if (method == "PATCH") {
+                // For PATCH without body, still need to set doOutput
+                conn.doOutput = true
             }
 
             val code = conn.responseCode
             val input = if (code in 200..299) conn.inputStream else conn.errorStream
             val text = input?.bufferedReader()?.use { it.readText() } ?: ""
 
+            Log.d(TAG, "Response Code: $code")
+            Log.d(TAG, "Response Body: $text")
+            Log.d(TAG, "=== END API REQUEST ===")
+
             // Parse response
             val jsonResponse = if (text.isNotEmpty()) JSONObject(text) else JSONObject()
             jsonResponse.put("statusCode", code) // Add status code to response
             jsonResponse
         } catch (e: Exception) {
+            Log.e(TAG, "API Request Error: ${e.message}", e)
             e.printStackTrace()
             null
         } finally {

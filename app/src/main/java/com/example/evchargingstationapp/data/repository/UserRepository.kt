@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.example.evchargingstationapp.data.local.PrefsHelper
 import com.example.evchargingstationapp.data.local.UserDbHelper
+import com.example.evchargingstationapp.data.remote.ApiClient
 import com.example.evchargingstationapp.model.User
 import org.json.JSONArray
 import org.json.JSONObject
@@ -15,6 +16,7 @@ import java.net.URL
 class UserRepository(private val context: Context) {
     private val db = UserDbHelper(context)
     private val prefs = PrefsHelper(context)
+    private val apiClient = ApiClient(context)
 
     companion object {
         private const val TAG = "UserRepository"
@@ -222,6 +224,64 @@ class UserRepository(private val context: Context) {
 
     // Refresh token
     fun refreshAccessToken(callback: (success: Boolean, message: String) -> Unit) { /* unchanged */ }
+
+    /**
+     * Deactivate the current user's account
+     */
+    fun deactivateAccount(callback: (success: Boolean, message: String) -> Unit) {
+        Thread {
+            try {
+                val response = apiClient.makeRequest(
+                    endpoint = "/api/v1/EVOwners/me/deactivate",
+                    method = "PATCH",
+                    requiresAuth = true
+                )
+
+                if (response != null) {
+                    val statusCode = response.optInt("statusCode", 0)
+                    val success = statusCode in 200..299
+
+                    // Extract message from various possible response formats
+                    val message = if (success) {
+                        response.optString("message",
+                            response.optString("Message", "Account deactivated successfully"))
+                    } else {
+                        // Try to extract error message from different possible formats
+                        val errorMsg = response.optString("message",
+                            response.optString("Message",
+                                response.optString("title", "Failed to deactivate account")))
+
+                        // Log the full response for debugging
+                        Log.e(TAG, "Deactivation failed. Status: $statusCode, Response: $response")
+                        errorMsg
+                    }
+
+                    if (success) {
+                        // Update local database
+                        val userNic = prefs.getNic()
+                        if (userNic != null) {
+                            db.setStatus(userNic, 0)
+                        }
+                    }
+
+                    (context as? android.app.Activity)?.runOnUiThread {
+                        callback(success, message)
+                    } ?: callback(success, message)
+                } else {
+                    val msg = "Cannot connect to server. Please check your connection."
+                    (context as? android.app.Activity)?.runOnUiThread {
+                        callback(false, msg)
+                    } ?: callback(false, msg)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error deactivating account: ${e.message}")
+                val msg = "An error occurred while deactivating account"
+                (context as? android.app.Activity)?.runOnUiThread {
+                    callback(false, msg)
+                } ?: callback(false, msg)
+            }
+        }.start()
+    }
 
     fun isUserLoggedIn(): Boolean = prefs.isLoggedIn()
     fun logout() { prefs.clear() }
