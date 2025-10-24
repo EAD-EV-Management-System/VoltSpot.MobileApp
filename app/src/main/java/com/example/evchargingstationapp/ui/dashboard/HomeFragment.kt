@@ -15,8 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.evchargingstationapp.R
 import com.example.evchargingstationapp.data.local.PrefsHelper
-import com.example.evchargingstationapp.data.repository.BookingRepository
 import com.example.evchargingstationapp.ui.bookings.BookingAdapter
+import com.example.evchargingstationapp.data.repository.BookingRepository
+import com.example.evchargingstationapp.data.repository.ChargingStationRepository
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -24,6 +25,11 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import android.content.Intent
+import com.example.evchargingstationapp.model.ChargingStation
+import com.example.evchargingstationapp.ui.bookings.AddBookingActivity
+import com.example.evchargingstationapp.utils.createMarkerWithLabel
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import java.util.Calendar
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
@@ -38,14 +44,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var prefs: PrefsHelper
     private lateinit var bookingAdapter: BookingAdapter
 
+    private lateinit var chargingStationRepository: ChargingStationRepository
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
+        // Initialize repositories and prefs
         bookingRepository = BookingRepository(requireContext())
         prefs = PrefsHelper(requireContext())
+        chargingStationRepository = ChargingStationRepository(requireContext())
 
         tvGreeting = view.findViewById(R.id.tvGreeting)
         tvPending = view.findViewById(R.id.tvPendingReservations)
@@ -62,7 +73,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         loadUpcomingBookings()
 
         view.findViewById<TextView>(R.id.tvSeeAll).setOnClickListener {
-            // Navigate to BookingFragment (which has the tabs)
             (requireActivity() as? MainActivity)?.navigateToBookings()
         }
 
@@ -126,12 +136,22 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         googleMap = map
         googleMap.uiSettings.isZoomControlsEnabled = true
 
+        googleMap.setOnMarkerClickListener { marker ->
+            val station = marker.tag as? ChargingStation // set the tag when adding markers
+            if (station != null) {
+                val intent = Intent(requireContext(), AddBookingActivity::class.java)
+                intent.putExtra("STATION_ID", station.id)        // pass ID
+                intent.putExtra("STATION_NAME", station.name)    // pass name for display
+                startActivity(intent)
+            }
+            true
+        }
+
+
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100)
             return
@@ -140,19 +160,54 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         googleMap.isMyLocationEnabled = true
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            location?.let {
-                val currentLatLng = LatLng(it.latitude, it.longitude)
+            if (location != null) {
+                val currentLatLng = LatLng(location.latitude, location.longitude)
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 14f))
+                googleMap.addMarker(MarkerOptions().position(currentLatLng).title("You are here"))
 
-                // Add a few mock nearby stations
-                val nearbyStations = listOf(
-                    LatLng(it.latitude + 0.002, it.longitude + 0.002),
-                    LatLng(it.latitude - 0.002, it.longitude - 0.002)
-                )
-                nearbyStations.forEachIndexed { i, loc ->
-                    googleMap.addMarker(MarkerOptions().position(loc).title("Station ${i + 1}"))
+                // Fetch stations only if logged in
+                if (prefs.isLoggedIn()) {
+                    fetchChargingStations()
+                } else {
+                    Toast.makeText(context, "Login to see charging stations", Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                Toast.makeText(context, "Unable to get current location", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun fetchChargingStations() {
+        chargingStationRepository.getAllStations { success, message, stations ->
+            if (success && stations != null) {
+                stations.forEach { station ->
+                    val position = LatLng(station.latitude, station.longitude)
+                    val marker = googleMap.addMarker(
+                        MarkerOptions()
+                            .position(position)
+                            .icon(createMarkerWithLabel(requireContext(), station.name))
+                            .anchor(0.5f, 1f) // anchor bottom-center
+                    )
+                    marker?.tag = station // store the station object in the marker
+                    marker?.showInfoWindow()
+
+                }
+            } else {
+                Toast.makeText(context, "Failed to load charging stations: $message", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 100 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            mapView.getMapAsync(this) // retry loading map now that permission is granted
+        } else {
+            Toast.makeText(context, "Location permission is required to show nearby stations", Toast.LENGTH_SHORT).show()
         }
     }
 

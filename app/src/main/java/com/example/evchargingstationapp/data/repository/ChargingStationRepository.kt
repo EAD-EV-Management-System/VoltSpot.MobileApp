@@ -11,18 +11,15 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class ChargingStationRepository(private val context: Context) {
+
     private val prefs = PrefsHelper(context)
 
     companion object {
         private const val TAG = "ChargingStationRepo"
-        private const val BASE_URL = "http://192.168.8.126:5058/" // Change to your backend URL
+        private const val BASE_URL = "http://192.168.8.126:5058/" // Your backend URL
     }
 
-    private fun sendRequest(
-        urlString: String,
-        method: String,
-        jsonBody: JSONObject? = null
-    ): JSONObject? {
+    private fun sendRequest(urlString: String, method: String, jsonBody: JSONObject? = null): JSONObject? {
         var conn: HttpURLConnection? = null
         return try {
             Log.d(TAG, "=== NETWORK REQUEST ===")
@@ -34,12 +31,14 @@ class ChargingStationRepository(private val context: Context) {
             conn.requestMethod = method
             conn.setRequestProperty("Content-Type", "application/json")
 
-            // Note: Charging stations endpoint might be public, not requiring auth
-            // Commenting out auth for now
-            // val token = prefs.getAccessToken()
-            // if (!token.isNullOrEmpty()) {
-            //     conn.setRequestProperty("Authorization", "Bearer $token")
-            // }
+            // Add Bearer token if available
+            val token = prefs.getAccessToken()
+            if (!token.isNullOrEmpty()) {
+                conn.setRequestProperty("Authorization", "Bearer $token")
+                Log.d(TAG, "Authorization header set")
+            } else {
+                Log.e(TAG, "No access token found")
+            }
 
             conn.connectTimeout = 10000
             conn.readTimeout = 10000
@@ -55,7 +54,6 @@ class ChargingStationRepository(private val context: Context) {
             val code = conn.responseCode
             Log.d(TAG, "Response Code: $code")
 
-            // Handle empty response body for error codes
             if (code == 401 || code == 403) {
                 Log.e(TAG, "Authentication/Authorization failed")
                 return JSONObject().apply {
@@ -67,11 +65,9 @@ class ChargingStationRepository(private val context: Context) {
 
             val input = if (code in 200..299) conn.inputStream else conn.errorStream
             val text = input?.bufferedReader()?.use { it.readText() } ?: ""
-
             Log.d(TAG, "Response Body: $text")
             Log.d(TAG, "=== END NETWORK REQUEST ===")
 
-            // Handle empty response
             if (text.isBlank()) {
                 return JSONObject().apply {
                     put("Success", false)
@@ -107,62 +103,29 @@ class ChargingStationRepository(private val context: Context) {
         )
     }
 
-    fun getAllStations(
-        callback: (success: Boolean, message: String, stations: List<ChargingStation>?) -> Unit
-    ) {
+    fun getAllStations(callback: (success: Boolean, message: String, stations: List<ChargingStation>?) -> Unit) {
         Thread {
-            Log.d(TAG, "Fetching all charging stations")
+            if (prefs.getAccessToken().isNullOrEmpty()) {
+                (context as? android.app.Activity)?.runOnUiThread {
+                    callback(false, "User not logged in", null)
+                }
+                return@Thread
+            }
 
             val resp = sendRequest("${BASE_URL}api/v1/ChargingStation?onlyActive=true", "GET")
-            if (resp != null) {
-                val success = resp.optBoolean("Success", false)
-                val message = resp.optString("Message", "Unknown error")
-                val dataArray = resp.optJSONArray("Data")
+            val success = resp?.optBoolean("Success", false) ?: false
+            val message = resp?.optString("Message", "Unknown error") ?: "Unknown error"
+            val dataArray = resp?.optJSONArray("Data")
 
-                val stations = if (success && dataArray != null) {
-                    (0 until dataArray.length()).map { i ->
-                        parseStation(dataArray.getJSONObject(i))
-                    }
-                } else {
-                    emptyList()
-                }
-
-                (context as? android.app.Activity)?.runOnUiThread {
-                    callback(success, message, stations)
-                } ?: callback(success, message, stations)
+            val stations = if (success && dataArray != null) {
+                (0 until dataArray.length()).map { i -> parseStation(dataArray.getJSONObject(i)) }
             } else {
-                val msg = "Cannot connect to server"
-                (context as? android.app.Activity)?.runOnUiThread {
-                    callback(false, msg, null)
-                } ?: callback(false, msg, null)
+                emptyList()
             }
-        }.start()
-    }
 
-    fun getStationById(
-        stationId: String,
-        callback: (success: Boolean, message: String, station: ChargingStation?) -> Unit
-    ) {
-        Thread {
-            Log.d(TAG, "Fetching station: $stationId")
-
-            val resp = sendRequest("${BASE_URL}api/v1/ChargingStation/$stationId", "GET")
-            if (resp != null) {
-                val success = resp.optBoolean("Success", false)
-                val message = resp.optString("Message", "Unknown error")
-                val data = resp.optJSONObject("Data")
-
-                val station = if (success && data != null) parseStation(data) else null
-
-                (context as? android.app.Activity)?.runOnUiThread {
-                    callback(success, message, station)
-                } ?: callback(success, message, station)
-            } else {
-                val msg = "Cannot connect to server"
-                (context as? android.app.Activity)?.runOnUiThread {
-                    callback(false, msg, null)
-                } ?: callback(false, msg, null)
-            }
+            (context as? android.app.Activity)?.runOnUiThread {
+                callback(success, message, stations)
+            } ?: callback(success, message, stations)
         }.start()
     }
 }

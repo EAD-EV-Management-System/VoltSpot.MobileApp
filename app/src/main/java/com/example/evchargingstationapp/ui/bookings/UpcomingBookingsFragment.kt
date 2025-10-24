@@ -16,7 +16,6 @@ import com.example.evchargingstationapp.data.repository.BookingRepository
 import com.example.evchargingstationapp.model.Booking
 import com.example.evchargingstationapp.model.BookingStatus
 import com.example.evchargingstationapp.model.CancelBookingRequest
-import com.example.evchargingstationapp.model.UpdateBookingRequest
 import com.facebook.shimmer.ShimmerFrameLayout
 
 class UpcomingBookingsFragment : Fragment() {
@@ -40,12 +39,12 @@ class UpcomingBookingsFragment : Fragment() {
         bookingRepository = BookingRepository(requireContext())
         prefs = PrefsHelper(requireContext())
 
-        // Initialize adapter with callbacks
+        // Initialize adapter with cancel callback only
+        // Update is now handled by UpdateBookingActivity (opened from adapter directly)
         adapter = BookingAdapter(
             emptyList(),
             requireContext(),
-            onCancelClick = { booking -> showCancelDialog(booking) },
-            onUpdateClick = { booking -> showUpdateDialog(booking) }
+            onCancelClick = { booking -> showCancelDialog(booking) }
         )
         recyclerView.adapter = adapter
 
@@ -116,38 +115,6 @@ class UpcomingBookingsFragment : Fragment() {
                 loadBookings() // Reload the list
             } else {
                 Toast.makeText(context, "Failed to cancel: $message", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    private fun showUpdateDialog(booking: Booking) {
-        val input = EditText(context)
-        input.hint = "New date/time (yyyy-MM-ddTHH:mm:ss)"
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Update Booking")
-            .setMessage("Enter new reservation date and time")
-            .setView(input)
-            .setPositiveButton("Update") { _, _ ->
-                val newDateTime = input.text.toString().trim()
-                if (newDateTime.isEmpty()) {
-                    Toast.makeText(context, "Please provide a date/time", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-                updateBooking(booking.id, newDateTime)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun updateBooking(bookingId: String, newDateTime: String) {
-        val request = UpdateBookingRequest(bookingId, newDateTime)
-        bookingRepository.updateBooking(request) { success, message ->
-            if (success) {
-                Toast.makeText(context, "Booking updated successfully", Toast.LENGTH_SHORT).show()
-                loadBookings() // Reload the list
-            } else {
-                Toast.makeText(context, "Failed to update: $message", Toast.LENGTH_LONG).show()
             }
         }
     }

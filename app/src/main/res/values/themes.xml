@@ -4,10 +4,13 @@
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
          <item name="android:statusBarColor">@color/primaryGrey</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
 
     </style>
     <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/darkGrey</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+
     </style>
 
     <style name="Theme.EVChargingStationApp" parent="Theme.Material3.Dark.NoActionBar">
@@ -16,12 +19,16 @@
         <item name="colorSurface">@color/primaryGrey</item>
         <item name="colorOnSurface">@color/white</item>
         <item name="android:statusBarColor">?attr/colorSurface</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+
     </style>
 
     <style name="Theme.EVChargingStationApp.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@drawable/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/app_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.EVChargingStationApp</item>
+        <item name="android:fontFamily">@font/poppins_regular</item>
+
     </style>
 
 </resources>

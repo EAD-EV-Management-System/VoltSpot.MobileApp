@@ -106,7 +106,7 @@ class BookingDetailActivity : AppCompatActivity() {
         }
 
         // Generate QR code
-        generateQRCode(booking.id, qrImage)
+        generateQRCode(booking.qrCodeId ?: booking.id, qrImage)
     }
 
     private fun completeBooking(bookingId: String) {

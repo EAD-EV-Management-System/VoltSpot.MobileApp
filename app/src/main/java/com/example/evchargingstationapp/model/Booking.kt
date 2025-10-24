@@ -37,7 +37,8 @@ data class Booking(
     val status: BookingStatus,
     val cancellationReason: String? = null,
     val createdAt: String,
-    val updatedAt: String? = null
+    val updatedAt: String? = null,
+    val qrCodeId: String? = null
 )
 
 enum class BookingStatus {

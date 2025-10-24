@@ -52,6 +52,11 @@
             android:exported="false"
             android:label="Booking Details" />
 
+        <activity
+            android:name=".ui.bookings.UpdateBookingActivity"
+            android:label="Update Booking"
+            android:parentActivityName=".MainActivity" />
+
         <!-- Station Operator Activities -->
         <activity
             android:name=".ui.operator.OperatorLoginActivity"

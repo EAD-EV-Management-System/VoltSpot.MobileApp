@@ -33,9 +33,13 @@ class AddBookingActivity : AppCompatActivity() {
     private var stationIds = mutableListOf<String>()
     private var stationNames = mutableListOf<String>()
 
+    private var preselectedStationName: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_booking)
+
+        preselectedStationName = intent.getStringExtra("STATION_NAME")
 
         bookingRepository = BookingRepository(this)
         stationRepository = ChargingStationRepository(this)
@@ -104,7 +108,18 @@ class AddBookingActivity : AppCompatActivity() {
                     )
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     spinnerStations.adapter = adapter
-                } else {
+
+                    // Preselect station if coming from map
+                    // Preselect station if coming from map using ID
+                    val preselectedStationId = intent.getStringExtra("STATION_ID")
+                    preselectedStationId?.let { id ->
+                        val index = stationIds.indexOf(id)
+                        if (index >= 0) {
+                            spinnerStations.setSelection(index)
+                        }
+                    }
+                }
+                else {
                     Toast.makeText(this, "No active charging stations available", Toast.LENGTH_LONG).show()
                     // For testing, add a dummy station
                     addDummyStation()

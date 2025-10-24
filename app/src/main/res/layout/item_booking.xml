@@ -4,9 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp"
-    android:backgroundTint="@color/primaryGrey">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="6dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardUseCompatPadding="true"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,66 +18,87 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Booking ID -->
+        <TextView
+            android:id="@+id/tvBookingId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Booking ID:"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Station name -->
         <TextView
             android:id="@+id/tvStationName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Station Name"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:layout_marginTop="6dp"
+            android:text="Station:"
+            android:textColor="@android:color/black"
+            android:textSize="15sp" />
+
+        <!-- Slot No -->
 
         <TextView
             android:id="@+id/tvSlotNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Slot: 1"
-            android:textColor="@color/primaryGrey"
-            android:textSize="14sp" />
+            android:layout_marginTop="6dp"
+            android:text="Slot:"
+            android:textColor="@android:color/black"
+            android:textSize="15sp" />
 
-        <TextView
-            android:id="@+id/tvReservationDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Date &amp; Time"
-            android:textColor="@color/primaryGrey"
-            android:textSize="14sp" />
-
+        <!-- Status -->
         <TextView
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Status"
-            android:textColor="@color/primaryGreen"
+            android:text="Pending"
+            android:textColor="@color/statusPending"
             android:textSize="14sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/tvReservationTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Reserved Time:"
+            android:textColor="@android:color/black"
+            android:textSize="15sp" />
+
+        <!-- Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:orientation="horizontal"
-            android:gravity="end">
+            android:gravity="end"
+            android:orientation="horizontal">
+
+
 
             <Button
                 android:id="@+id/btnUpdate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Update"
+                android:textAllCaps="false"
                 android:backgroundTint="@color/primaryGreen"
-                android:textColor="@color/white"
-                android:layout_marginEnd="8dp" />
+                android:textColor="@android:color/white"
+                android:layout_marginEnd="8dp"
+                android:paddingHorizontal="20dp" />
 
             <Button
                 android:id="@+id/btnCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cancel"
+                android:textAllCaps="false"
                 android:backgroundTint="@color/errorRed"
-                android:textColor="@color/white" />
+                android:textColor="@android:color/white"
+                android:paddingHorizontal="20dp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

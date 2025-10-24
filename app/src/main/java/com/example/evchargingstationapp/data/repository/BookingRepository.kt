@@ -218,22 +218,30 @@ class BookingRepository(private val context: Context) {
     }
 
     // Update Booking
+    // Replace the updateBooking method in your BookingRepository class with this:
+
+    // If your API uses PATCH instead of PUT, use this version:
+
     fun updateBooking(
-        request: UpdateBookingRequest,
-        callback: (success: Boolean, message: String) -> Unit
+        bookingId: String,
+        reservationDateTime: String,
+        callback: (Boolean, String?) -> Unit
     ) {
         Thread {
-            Log.d(TAG, "Updating booking: ${request.bookingId}")
+            Log.d(TAG, "Updating booking: $bookingId with new time: $reservationDateTime")
 
             val body = JSONObject().apply {
-                put("BookingId", request.bookingId)
-                put("NewReservationDateTime", request.newReservationDateTime)
+                put("BookingId", bookingId)
+                put("NewReservationDateTime", reservationDateTime)
             }
 
+            // Using put method
+
             val resp = sendRequest("${BASE_URL}api/v1/Booking/update", "PUT", body)
+
             if (resp != null) {
-                val success = resp.optBoolean("Success", false)
-                val message = resp.optString("Message", "Unknown error")
+                val success = resp.safeGetBoolean("Success")
+                val message = resp.safeGetString("Message", "Unknown error")
 
                 (context as? android.app.Activity)?.runOnUiThread {
                     callback(success, message)
@@ -262,8 +270,8 @@ class BookingRepository(private val context: Context) {
 
             val resp = sendRequest("${BASE_URL}api/v1/Booking/cancel", "PUT", body)
             if (resp != null) {
-                val success = resp.optBoolean("Success", false)
-                val message = resp.optString("Message", "Unknown error")
+                val success = resp.safeGetBoolean("Success")
+                val message = resp.safeGetString("Message", "Unknown error")
 
                 (context as? android.app.Activity)?.runOnUiThread {
                     callback(success, message)
