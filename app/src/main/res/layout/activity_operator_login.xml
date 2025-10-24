@@ -1,59 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
-    android:background="@color/primaryGrey"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="STATION OPERATOR LOGIN"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:padding="12dp"
-        android:background="@color/primaryGreen"
-        android:textColor="@color/white"
-        android:layout_marginBottom="32dp" />
-    <EditText
-        android:id="@+id/etUsername"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:hint="@string/username"
-        android:inputType="text"
-        android:textColor="@color/white"
-        android:textColorHint="@color/primaryGrey"
-        android:layout_marginBottom="16dp" />
+    android:layout_height="match_parent"
+    android:background="@color/primaryGrey"
+    android:fillViewport="true">
 
-    <EditText
-        android:id="@+id/etPassword"
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:hint="@string/password"
-        android:inputType="textPassword"
-        android:textColor="@color/white"
-        android:textColorHint="@color/primaryGrey"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/login"
-        android:backgroundTint="@color/primaryGreen"
-        android:textColor="@color/white"
-        android:layout_marginBottom="16dp" />
+        <!-- Bolt Icon -->
+        <ImageView
+            android:id="@+id/imgBoltIcon"
+            android:layout_width="157dp"
+            android:layout_height="82dp"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/outline_bolt_24"
+            android:tint="@color/primaryGreen" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:visibility="gone"
-        android:indeterminate="true"
-        android:layout_gravity="center" />
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="STATION OPERATOR LOGIN"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:layout_marginBottom="32dp" />
 
-</LinearLayout>
+        <!-- Username Field -->
+        <EditText
+            android:id="@+id/etUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:hint="Enter your username"
+            android:inputType="textPersonName"
+            android:textColor="@color/white"
+            android:textColorHint="@color/lightGrey"
+            android:backgroundTint="@color/primaryGreen"
+            android:drawablePadding="10dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Password Field -->
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:hint="Enter your password"
+            android:inputType="textPassword"
+            android:textColor="@color/white"
+            android:textColorHint="@color/lightGrey"
+            android:backgroundTint="@color/primaryGreen"
+            android:drawablePadding="10dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Login Button -->
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/login"
+            android:backgroundTint="@color/primaryGreen"
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:visibility="gone"
+            android:indeterminate="true"
+            android:layout_gravity="center" />
+
+        <!-- Redirect to EV Owner Login -->
+        <TextView
+            android:id="@+id/tvEvOwnerLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Login as EV Owner"
+            android:textColor="@color/primaryGreen"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+</ScrollView>

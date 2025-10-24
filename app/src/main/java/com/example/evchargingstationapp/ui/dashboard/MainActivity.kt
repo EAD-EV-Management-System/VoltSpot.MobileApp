@@ -37,11 +37,11 @@ class MainActivity : AppCompatActivity() {
                     topAppBar.title = "Bookings"
                     true
                 }
-                R.id.bottom_power -> {
-                    replaceFragment(StationsFragment())
-                    topAppBar.title = "Stations"
-                    true
-                }
+//                R.id.bottom_power -> {
+//                    replaceFragment(StationsFragment())
+//                    topAppBar.title = "Stations"
+//                    true
+//                }
                 R.id.bottom_profile -> {
                     replaceFragment(ProfileFragment())
                     topAppBar.title = "Profile"

@@ -15,7 +15,7 @@ class BookingRepository(private val context: Context) {
 
     companion object {
         private const val TAG = "BookingRepository"
-        private const val BASE_URL = "http://192.168.8.126:5058/" // Change to your backend URL
+        private const val BASE_URL = "http://10.0.2.2:5058/"
     }
 
     // Helper function to safely get boolean from JSON with both cases
@@ -118,6 +118,50 @@ class BookingRepository(private val context: Context) {
             createdAt = json.optString("CreatedAt", ""),
             updatedAt = json.optString("UpdatedAt")
         )
+    }
+
+    // Get available slots
+    fun getAvailableSlots(
+        stationId: String,
+        date: String,   // format: yyyy-MM-dd
+        time: String,   // format: HH:mm
+        durationInMinutes: Int,
+        callback: (success: Boolean, message: String, slots: List<Int>?) -> Unit
+    ) {
+        Thread {
+            val url = "${BASE_URL}api/v1/ChargingStation/$stationId/available-slots?date=$date&time=$time&durationInMinutes=$durationInMinutes"
+            Log.d(TAG, "Fetching available slots from: $url")
+
+            val resp = sendRequest(url, "GET")
+
+            if (resp != null) {
+                val success = resp.safeGetBoolean("Success")
+                val message = resp.safeGetString("Message", "Unknown error")
+
+                // FIXED: Get the nested Data object first
+                val dataObject = resp.safeGetJSONObject("Data")
+                val slotsArray = dataObject?.safeGetJSONArray("AvailableSlots")
+
+                val slots = if (success && slotsArray != null && slotsArray.length() > 0) {
+                    val slotList = (0 until slotsArray.length()).map { slotsArray.getInt(it) }
+                    Log.d(TAG, "Parsed available slots: $slotList")
+                    slotList
+                } else {
+                    Log.d(TAG, "No available slots found in response")
+                    null
+                }
+
+                (context as? android.app.Activity)?.runOnUiThread {
+                    callback(success, message, slots)
+                } ?: callback(success, message, slots)
+            } else {
+                Log.e(TAG, "Failed to get response from server")
+                val msg = "Cannot connect to server"
+                (context as? android.app.Activity)?.runOnUiThread {
+                    callback(false, msg, null)
+                } ?: callback(false, msg, null)
+            }
+        }.start()
     }
 
     // Create Booking

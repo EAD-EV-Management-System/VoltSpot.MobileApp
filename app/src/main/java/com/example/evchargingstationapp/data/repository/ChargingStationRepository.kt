@@ -16,7 +16,7 @@ class ChargingStationRepository(private val context: Context) {
 
     companion object {
         private const val TAG = "ChargingStationRepo"
-        private const val BASE_URL = "http://192.168.8.126:5058/" // Your backend URL
+        private const val BASE_URL = "http://10.0.2.2:5058/"
     }
 
     private fun sendRequest(urlString: String, method: String, jsonBody: JSONObject? = null): JSONObject? {

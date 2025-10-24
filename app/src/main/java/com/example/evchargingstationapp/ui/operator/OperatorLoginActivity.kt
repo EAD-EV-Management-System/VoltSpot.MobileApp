@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.evchargingstationapp.R
@@ -30,6 +31,15 @@ class OperatorLoginActivity : AppCompatActivity() {
         etPassword = findViewById(R.id.etPassword)
         btnLogin = findViewById(R.id.btnLogin)
         progressBar = findViewById(R.id.progressBar)
+
+
+        val evOwnerLoginLink = findViewById<TextView>(R.id.tvEvOwnerLogin)
+        evOwnerLoginLink.setOnClickListener {
+            val intent = Intent(this, com.example.evchargingstationapp.ui.auth.LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
 
         // Login button
         btnLogin.setOnClickListener {

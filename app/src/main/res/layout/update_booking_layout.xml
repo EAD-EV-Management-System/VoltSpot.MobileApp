@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Booking ID"
-            android:textColor="@color/primaryGrey"
+            android:textColor="@color/white"
             android:textSize="14sp"
             android:layout_marginBottom="8dp"/>
 
@@ -53,7 +53,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Charging Station"
-            android:textColor="@color/primaryGrey"
+            android:textColor="@color/white"
             android:textSize="14sp"
             android:layout_marginBottom="8dp"/>
 
@@ -81,7 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Slot Number"
-            android:textColor="@color/primaryGrey"
+            android:textColor="@color/white"
             android:textSize="14sp"
             android:layout_marginBottom="8dp"/>
 
@@ -108,7 +108,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/primaryGrey"
+            android:background="@color/lightGrey"
             android:layout_marginBottom="24dp"/>
 
         <!-- Date and Time Selection -->
@@ -208,7 +208,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Note: Only the date and time will be updated. Your booking will remain pending until confirmed."
-            android:textColor="@color/primaryGrey"
+            android:textColor="@color/lightGrey"
             android:textSize="12sp"
             android:layout_marginTop="16dp"
             android:gravity="center"/>

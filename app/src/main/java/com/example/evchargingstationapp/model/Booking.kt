@@ -5,8 +5,8 @@ data class CreateBookingRequest(
     val evOwnerNic: String,
     val chargingStationId: String,
     val slotNumber: Int,
-    val reservationDateTime: String // ISO 8601 format: yyyy-MM-ddTHH:mm:ss
-)
+    val reservationDateTime: String, // ISO 8601 format: yyyy-MM-ddTHH:mm:ss
+    val durationInMinutes: Int )
 
 data class UpdateBookingRequest(
     val bookingId: String,

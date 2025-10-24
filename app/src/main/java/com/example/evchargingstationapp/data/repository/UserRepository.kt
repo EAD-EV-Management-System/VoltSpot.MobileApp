@@ -18,7 +18,8 @@ class UserRepository(private val context: Context) {
 
     companion object {
         private const val TAG = "UserRepository"
-        private const val BASE_URL = "http://192.168.8.126:5058/" // ⚠️ Update if needed
+        private const val BASE_URL = "http://10.0.2.2:5058/"
+
     }
 
     /**

@@ -17,7 +17,7 @@ class OperatorRepository(private val context: Context) {
 
     companion object {
         private const val TAG = "OperatorRepository"
-        private const val BASE_URL = "http://192.168.8.126:5058/"  // ⚠️ Adjust to match your backend IP
+        private const val BASE_URL = "http://10.0.2.2:5058/"
     }
 
     /**
