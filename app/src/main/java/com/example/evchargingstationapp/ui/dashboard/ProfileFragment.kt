@@ -1,5 +1,6 @@
 package com.example.evchargingstationapp.ui.dashboard
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.evchargingstationapp.R
 import com.example.evchargingstationapp.data.local.PrefsHelper
@@ -22,6 +24,7 @@ class ProfileFragment : Fragment() {
     private lateinit var tvEmail: TextView
     private lateinit var tvNic: TextView
     private lateinit var btnLogout: Button
+    private lateinit var btnDeactivate: Button
     private lateinit var userRepository: UserRepository
 
     override fun onCreateView(
@@ -38,6 +41,7 @@ class ProfileFragment : Fragment() {
         tvEmail = view.findViewById(R.id.tvEmail)
         tvNic = view.findViewById(R.id.tvNic)
         btnLogout = view.findViewById(R.id.btnLogout)
+        btnDeactivate = view.findViewById(R.id.btnDeactivate)
 
         // Show loading
         loadingContainer.visibility = View.VISIBLE
@@ -51,6 +55,11 @@ class ProfileFragment : Fragment() {
         // Logout button
         btnLogout.setOnClickListener {
             logout()
+        }
+
+        // Deactivate button
+        btnDeactivate.setOnClickListener {
+            showDeactivateConfirmationDialog()
         }
 
         return view
@@ -73,6 +82,44 @@ class ProfileFragment : Fragment() {
 
         loadingContainer.visibility = View.GONE
         profileContainer.visibility = View.VISIBLE
+    }
+
+    private fun showDeactivateConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Deactivate Account")
+            .setMessage("Are you sure you want to deactivate your account? You will be logged out and your account will be deactivated.")
+            .setPositiveButton("Yes, Deactivate") { _, _ ->
+                deactivateAccount()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deactivateAccount() {
+        // Show loading
+        loadingContainer.visibility = View.VISIBLE
+        profileContainer.visibility = View.GONE
+        btnDeactivate.isEnabled = false
+
+        userRepository.deactivateAccount { success, message ->
+            requireActivity().runOnUiThread {
+                if (success) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                    // Clear session and navigate to login
+                    userRepository.logout()
+                    val intent = Intent(requireContext(), LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    requireActivity().finish()
+                } else {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                    // Re-enable button and show profile again
+                    btnDeactivate.isEnabled = true
+                    loadingContainer.visibility = View.GONE
+                    profileContainer.visibility = View.VISIBLE
+                }
+            }
+        }
     }
 
     private fun logout() {
